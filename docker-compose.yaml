@@ -10,8 +10,18 @@
 version: '3.7'
 
 services:
+  producer:
+    image: streaming-app:latest
+    container_name: producer
+    environment:
+      BROKER_URL: "PLAINTEXT://broker:9092"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+    volumes:
+    - ./:/app
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.2
+    container_name: zookeeper
     ports:
     - "2181:2181"
     environment:
@@ -19,6 +29,7 @@ services:
 
   kafka0:
     image: confluentinc/cp-kafka:5.2.2
+    container_name: broker
     ports:
     - "9092:9092"
     environment:
@@ -33,6 +44,7 @@ services:
 
   schema-registry:
     image: confluentinc/cp-schema-registry:5.2.2
+    container_name: schema_registry
     ports:
     - "8081:8081"
     environment:
@@ -45,6 +57,7 @@ services:
 
   rest-proxy:
     image: confluentinc/cp-kafka-rest:5.2.2
+    container_name: rest_proxy
     ports:
     - "8082:8082"
     environment:
@@ -58,6 +71,7 @@ services:
 
   connect:
     image: confluentinc/cp-kafka-connect:5.2.2
+    container_name: kafka_connect
     ports:
     - "8083:8083"
     environment:
@@ -83,6 +97,7 @@ services:
 
   ksql:
     image: confluentinc/cp-ksql-server:5.2.2
+    container_name: ksql
     ports:
     - "8088:8088"
     environment:
@@ -96,6 +111,7 @@ services:
 
   connect-ui:
     image: landoop/kafka-connect-ui:0.9.7
+    container_name: kafka_connect_ui
     ports:
     - "8084:8084"
     environment:
@@ -107,6 +123,7 @@ services:
 
   topics-ui:
     image: landoop/kafka-topics-ui:0.9.4
+    container_name: kafka_topic_ui
     ports:
     - "8085:8085"
     environment:
@@ -118,6 +135,7 @@ services:
 
   schema-registry-ui:
     image: landoop/schema-registry-ui:0.9.5
+    container_name: schema_registry_ui
     ports:
     - "8086:8086"
     environment:
@@ -129,6 +147,7 @@ services:
 
   postgres:
     image: postgres:11
+    container_name: stream_postgres
     ports:
     - "5432:5432"
     environment:

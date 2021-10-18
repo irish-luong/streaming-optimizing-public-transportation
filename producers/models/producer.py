@@ -1,12 +1,17 @@
 """Producer base-class providing common utilites and functionality"""
-import logging
 import time
+import logging
 
-
+# Kafka confluent
 from confluent_kafka import avro
-from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.avro import AvroProducer
+from confluent_kafka.admin import AdminClient, NewTopic
 
+# Project modules
+from settings import BROKER_URL, SCHEMA_REGISTRY_URL
+
+
+# Module configurations
 logger = logging.getLogger(__name__)
 
 
@@ -38,10 +43,11 @@ class Producer:
         #
         #
         self.broker_properties = {
-            # TODO
-            # TODO
-            # TODO
+            "bootstrap.servers": BROKER_URL
         }
+
+        # Schema registry
+        schema_registry = avro.CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
 
         # If the topic does not already exist, try to create it
         if self.topic_name not in Producer.existing_topics:
@@ -49,10 +55,18 @@ class Producer:
             Producer.existing_topics.add(self.topic_name)
 
         # TODO: Configure the AvroProducer
-        # self.producer = AvroProducer(
-        # )
+        self.producer = AvroProducer(self.broker_properties, schema_registry=schema_registry)
 
-    def create_topic(self):
+        # Kafka Admin
+        self.admin = AdminClient(self.broker_properties)
+
+    def topic_exists(self) -> bool:
+        """
+        Method check given topic exist or not
+        """
+        return self.admin.list_topics().topics().get(self.topic_name)
+
+    def create_topic(self) -> None:
         """Creates the producer topic if it does not already exist"""
         #
         #
@@ -60,9 +74,37 @@ class Producer:
         # the Kafka Broker.
         #
         #
-        logger.info("topic creation kafka integration incomplete - skipping")
 
-    def time_millis(self):
+        # Check exist or not
+        if self.topic_exists():
+            logger.info(f"Topic {self.topic_name} exist already")
+            return
+
+        futures = self.admin.create_topics([
+            NewTopic(
+                self.topic_name,
+                num_partitions=self.num_partitions,
+                replication_factor=self.num_replicas,
+                config={
+                    "cleanup.policy": "compact",
+                    "compression.type": "gzip",
+                    "delete.retention.ms": 2000,
+                    "file.delete.delay.ms": 2000
+                }
+            )
+        ])
+
+        for future in futures:
+            try:
+                future.result()
+                logger.info(f"Created topic {self.topic_name}")
+            except Exception as e:
+                logger.error(f"Error when create topic {self.topic_name}: {e}")
+                raise e
+
+    @staticmethod
+    def time_millis() -> int:
+        """Use this function to get the key for Kafka Events"""
         return int(round(time.time() * 1000))
 
     def close(self):
@@ -72,8 +114,13 @@ class Producer:
         # TODO: Write cleanup code for the Producer here
         #
         #
-        logger.info("producer close incomplete - skipping")
 
-    def time_millis(self):
-        """Use this function to get the key for Kafka Events"""
-        return int(round(time.time() * 1000))
+        # delete topics
+        if self.topic_exists():
+            self.admin.deleteTopics(self.topic_name)
+            logger.info(f"Delete topic {self.topic_name}")
+
+        self.admin.close()
+        logger.info("Close Kafka Admin")
+
+        logger.info("producer close incomplete - skipping")

@@ -31,12 +31,6 @@ class Station(Producer):
             .replace("'", "")
         )
 
-        #
-        #
-        # TODO: Complete the below by deciding on a topic name, number of partitions, and number of
-        # replicas
-        #
-        #
         topic_name = f"{station_name}"
         super().__init__(
             topic_name,
@@ -74,7 +68,7 @@ class Station(Producer):
                "train_status": self.train.status.name,
                "prev_station_id": prev_station_id,
                "prev_direction": prev_direction
-           },
+           }
         )
 
     def __str__(self):
@@ -109,6 +103,3 @@ class Station(Producer):
 
 if __name__ == '__main__':
     pass
-    # s = Station()
-    # try:
-    #     s.run()

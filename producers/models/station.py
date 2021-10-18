@@ -86,7 +86,7 @@ class Station(Producer):
                 self.dir_a.name if self.dir_a is not None else "---",
                 self.b_train.train_id if self.b_train is not None else "---",
                 self.dir_b.name if self.dir_b is not None else "---",
-        )
+                )
 
     def __repr__(self):
         return str(self)

@@ -31,6 +31,8 @@ class Line:
         line = [
             Station(station_data["station_id"].unique()[0], stations[0], self.color)
         ]
+
+        count = 0
         prev_station = line[0]
         for station in stations[1:]:
             station_data = station_df[station_df["station_name"] == station]
@@ -43,6 +45,12 @@ class Line:
             prev_station.dir_b = new_station
             prev_station = new_station
             line.append(new_station)
+
+            count += 1
+
+            if count == 2:
+                break
+
         return line
 
     def _build_trains(self):

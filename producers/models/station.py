@@ -6,7 +6,7 @@ from confluent_kafka import avro
 
 from models import Turnstile
 from models.producer import Producer
-
+from pprint import pprint
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,10 @@ class Station(Producer):
             .replace("'", "")
         )
 
+        self.station_name = station_name
+
         topic_name = f"{station_name}"
-        super().__init__(
+        super(Station, self).__init__(
             topic_name,
             key_schema=Station.key_schema,
             value_schema=Station.value_schema,
@@ -55,20 +57,28 @@ class Station(Producer):
         # TODO: Complete this function by producing an arrival message to Kafka
         #
         #
-        logger.info("arrival kafka integration incomplete - skipping")
+
+        if train is None:
+            logger.info(f"None value {train}, {direction}, {prev_station_id}, {prev_direction}")
+            return
+
+        logger.info(f"Publish train: {train.train_id} | direction {direction} | line: {self.color.name} "
+                    f"prev_station_id: {prev_station_id} | prev_direction: {prev_direction}")
 
         self.producer.produce(
-           topic=self.topic_name,
-           key={"timestamp": self.time_millis()},
-           value={
-               "station_id": self.station_id,
-               "train_id": train,
-               "direction": direction,
-               "line": self.color,
-               "train_status": self.train.status.name,
-               "prev_station_id": prev_station_id,
-               "prev_direction": prev_direction
-           }
+            topic=self.topic_name,
+            key={"timestamp": self.time_millis()},
+            value={
+                "station_id": self.station_id,
+                "train_id": train.train_id,
+                "direction": direction,
+                "line": self.color.name,
+                "train_status": train.status.name,
+                "prev_station_id": prev_station_id or 1,
+                "prev_direction": prev_direction or "unknown"
+            },
+            key_schema=self.key_schema,
+            value_schema=self.value_schema
         )
 
     def __str__(self):
@@ -102,4 +112,4 @@ class Station(Producer):
 
 
 if __name__ == '__main__':
-    pass
+    station = Station(0, "okinawa", "green")

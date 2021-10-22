@@ -1,11 +1,8 @@
-import logging
 import math
-from pathlib import Path
 import random
-
+import logging
 import pandas as pd
-
-from models.producer import Producer
+from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +40,7 @@ class TurnstileHardware:
                 f"{Path(__file__).parents[1]}/data/ridership_seed.csv"
             )
 
-    def get_entries(self, timestamp, time_step):
+    def get_entries(self, timestamp, time_step) -> int:
         """Returns the number of turnstile entries for the given timeframe"""
         hour_curve = TurnstileHardware.curve_df[
             TurnstileHardware.curve_df["hour"] == timestamp.hour

@@ -14,22 +14,28 @@ services:
     image: streaming-app:latest
     container_name: producer
     environment:
-      BROKER_URL: "PLAINTEXT://broker:9092"
+      PYTHONPATH: "/app/producers"
+      BROKER_URL: "PLAINTEXT://kafka0:19092"
       SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KAFKA_CONNECT_URL: "http://connect:8083"
     volumes:
     - ./:/app
+    networks:
+      - streaming
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.2
     container_name: zookeeper
     ports:
     - "2181:2181"
+    networks:
+      - streaming
     environment:
       ZOOKEEPER_CLIENT_PORT: "2181"
 
   kafka0:
     image: confluentinc/cp-kafka:5.2.2
-    container_name: broker
+    container_name: kafka0
     ports:
     - "9092:9092"
     environment:
@@ -39,6 +45,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+    networks:
+      - streaming
     depends_on:
     - "zookeeper"
 
@@ -52,6 +60,8 @@ services:
       SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
       SCHEMA_REGISTRY_HOST_NAME: "schema-registry"
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: "1"
+    networks:
+      - streaming
     depends_on:
     - "kafka0"
 
@@ -65,6 +75,8 @@ services:
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082/"
       KAFKA_REST_HOST_NAME: "rest-proxy"
       KAFKA_REST_SCHEMA_REGISTRY_URL: "http://schema-registry:8081/"
+    networks:
+      - streaming
     depends_on:
     - "kafka0"
     - "schema-registry"
@@ -91,6 +103,8 @@ services:
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
+    networks:
+      - streaming
     depends_on:
     - "kafka0"
     - "schema-registry"
@@ -105,6 +119,8 @@ services:
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_KSQL_SERVICE_ID: "ksql_service_docker"
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081/"
+    networks:
+      - streaming
     depends_on:
     - "kafka0"
     - "schema-registry"
@@ -118,6 +134,8 @@ services:
       PORT: "8084"
       PROXY: "true"
       CONNECT_URL: "http://connect:8083"
+    networks:
+      - streaming
     depends_on:
     - "connect"
 
@@ -130,6 +148,8 @@ services:
       PORT: "8085"
       PROXY: "true"
       KAFKA_REST_PROXY_URL: "http://rest-proxy:8082"
+    networks:
+      - streaming
     depends_on:
     - "rest-proxy"
 
@@ -142,6 +162,8 @@ services:
       PORT: "8086"
       PROXY: "true"
       SCHEMAREGISTRY_URL: "http://schema-registry:8081/"
+    networks:
+      - streaming
     depends_on:
     - "schema-registry"
 
@@ -154,6 +176,13 @@ services:
       POSTGRES_USER: "cta_admin"
       POSTGRES_PASSWORD: "chicago"
       POSTGRES_DB: "cta"
+    networks:
+      - streaming
     volumes:
     - ./producers/data/cta_stations.csv:/tmp/cta_stations.csv
     - ./load_stations.sql:/docker-entrypoint-initdb.d/load_stations.sql
+
+
+networks:
+  streaming:
+    driver: bridge

@@ -42,6 +42,7 @@ class Producer:
         # and use the Host URL for Kafka and Schema Registry!
         #
         #
+
         self.broker_properties = {
             "bootstrap.servers": BROKER_URL
         }
@@ -49,22 +50,25 @@ class Producer:
         # Schema registry
         schema_registry = avro.CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
 
-        # If the topic does not already exist, try to create it
-        if self.topic_name not in Producer.existing_topics:
-            self.create_topic()
-            Producer.existing_topics.add(self.topic_name)
-
         # TODO: Configure the AvroProducer
         self.producer = AvroProducer(self.broker_properties, schema_registry=schema_registry)
 
         # Kafka Admin
         self.admin = AdminClient(self.broker_properties)
 
+        # If the topic does not already exist, try to create it
+        if self.topic_name not in Producer.existing_topics:
+            self.create_topic()
+            Producer.existing_topics.add(self.topic_name)
+
+    def __del__(self):
+        self.close()
+
     def topic_exists(self) -> bool:
         """
         Method check given topic exist or not
         """
-        return self.admin.list_topics().topics().get(self.topic_name)
+        return self.admin.list_topics().topics.get(self.topic_name)
 
     def create_topic(self) -> None:
         """Creates the producer topic if it does not already exist"""
@@ -80,26 +84,22 @@ class Producer:
             logger.info(f"Topic {self.topic_name} exist already")
             return
 
+        print(f"Create topic {self.topic_name}")
+
         futures = self.admin.create_topics([
             NewTopic(
                 self.topic_name,
                 num_partitions=self.num_partitions,
-                replication_factor=self.num_replicas,
-                config={
-                    "cleanup.policy": "compact",
-                    "compression.type": "gzip",
-                    "delete.retention.ms": 2000,
-                    "file.delete.delay.ms": 2000
-                }
+                replication_factor=self.num_replicas
             )
-        ])
+        ], validate_only=True)
 
-        for future in futures:
+        for topic, future in futures.items():
             try:
                 future.result()
-                logger.info(f"Created topic {self.topic_name}")
+                logger.info(f"Created topic {topic}")
             except Exception as e:
-                logger.error(f"Error when create topic {self.topic_name}: {e}")
+                logger.error(f"Error when create topic {topic}: {e}")
                 raise e
 
     @staticmethod
@@ -117,10 +117,10 @@ class Producer:
 
         # delete topics
         if self.topic_exists():
-            self.admin.deleteTopics(self.topic_name)
-            logger.info(f"Delete topic {self.topic_name}")
-
-        self.admin.close()
-        logger.info("Close Kafka Admin")
+            pass
+            # futures = self.admin.deleteTopics([self.topic_name])
+            # for topic, futures in futures.items():
+            #     futures.result()
+            #     logger.info(f"Delete topic {self.topic_name}")
 
         logger.info("producer close incomplete - skipping")

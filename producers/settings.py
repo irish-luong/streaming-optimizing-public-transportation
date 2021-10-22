@@ -1,4 +1,5 @@
 import os
 
 BROKER_URL = os.getenv("BROKER_URL")
+KAFKA_CONNECT_URL = os.getenv("KAFKA_CONNECT_URL")
 SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_URL")

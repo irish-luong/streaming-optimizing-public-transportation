@@ -6,11 +6,12 @@ import requests
 
 import topic_check
 
+from settings import KSQL_URL
 
 logger = logging.getLogger(__name__)
 
 
-KSQL_URL = "http://localhost:8088"
+KSQL_URL = KSQL_URL
 
 #
 # TODO: Complete the following KSQL statements.

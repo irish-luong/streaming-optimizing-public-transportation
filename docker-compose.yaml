@@ -10,6 +10,20 @@
 version: '3.7'
 
 services:
+
+  faust-app:
+    image: streaming-app:latest
+    container_name: faust-app
+    environment:
+      PYTHONPATH: "/app/consumers"
+      BROKER_URL: "kafka0:19092"
+      KAFKA_CONNECT_URL: "http://connect:8083"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+    volumes:
+      - ./:/app
+    networks:
+      - streaming
+
   producer:
     image: streaming-app:latest
     container_name: producer
@@ -19,9 +33,10 @@ services:
       SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KAFKA_CONNECT_URL: "http://connect:8083"
     volumes:
-    - ./:/app
+      - ./:/app
     networks:
       - streaming
+    command: python /app/producers/simulation.py
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.2

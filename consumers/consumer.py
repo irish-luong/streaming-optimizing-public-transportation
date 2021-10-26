@@ -1,11 +1,11 @@
 """Defines core consumer functionality"""
 import logging
-from abc import abstractmethod
 import confluent_kafka
+from tornado import gen
+from abc import abstractmethod
 from confluent_kafka import Consumer
 from confluent_kafka.avro import AvroConsumer
 from confluent_kafka.avro.serializer import SerializerError
-from tornado import gen
 
 from settings import BROKER_URL, SCHEMA_REGISTRY_URL, GROUP_ID
 
@@ -34,7 +34,7 @@ class KafkaConsumer:
         self.broker_properties = {
             "group.id": GROUP_ID,
             "max.poll.interval.ms": 60000,
-            "boostrap.servers": BROKER_URL,
+            "bootstrap.servers": BROKER_URL,
             "enable.auto.offset.store": False
         }
 
@@ -77,7 +77,7 @@ class KafkaConsumer:
             logger.error("Got error when consuming message")
             return 1
         else:
-            self.process_message(message)
+            self.message_handler(message)
             return 1
 
         return 0
@@ -86,6 +86,3 @@ class KafkaConsumer:
         """Cleans up any open kafka consumers"""
         logger.info("Close kafka consumer")
         self.consumer.close()
-
-    def process_message(self, message: confluent_kafka.Message) -> None:
-        raise NotImplementedError

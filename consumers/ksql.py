@@ -10,28 +10,37 @@ from settings import KSQL_URL
 
 logger = logging.getLogger(__name__)
 
-
-KSQL_URL = KSQL_URL
-
 #
 # TODO: Complete the following KSQL statements.
 # TODO: For the first statement, create a `turnstile` table from your turnstile topic.
 #       Make sure to use 'avro' datatype!
-# TODO: For the second statment, create a `turnstile_summary` table by selecting from the
+# TODO: For the second statement, create a `turnstile_summary` table by selecting from the
 #       `turnstile` table and grouping on station_id.
 #       Make sure to cast the COUNT of station id to `count`
 #       Make sure to set the value format to JSON
 
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (
-    ???
+    station_id BIGINT,
+    station_name VARCHAR,
+    line VARCHAR,
+    num_entries INT
 ) WITH (
-    ???
+    KAFKA_TOPIC='turnstile',
+    VALUE_FORMAT='AVRO',
+    KEY='station_id'
 );
 
 CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
+WITH (
+    VALUE_FORMAT='AVRO'
+) AS
+SELECT
+    station_id,
+    COUNT(*) as station_count
+FROM
+    turnstile
+GROUP BY station_id;
 """
 
 
@@ -48,12 +57,15 @@ def execute_statement():
         data=json.dumps(
             {
                 "ksql": KSQL_STATEMENT,
-                "streamsProperties": {"ksql.streams.auto.offset.reset": "earliest"},
+                "streamsProperties": {
+                    "ksql.streams.auto.offset.reset": "earliest"
+                },
             }
         ),
     )
 
-    # Ensure that a 2XX status code was returned
+    print(KSQL_STATEMENT)
+    print(resp.json())
     resp.raise_for_status()
 
 

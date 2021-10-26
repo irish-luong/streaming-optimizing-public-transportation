@@ -23,6 +23,46 @@ services:
       - ./:/app
     networks:
       - streaming
+    command: faust -A faust_stream worker -l info
+    depends_on:
+      - "kafka0"
+      - "schema-registry"
+
+  ksql-app:
+    image: streaming-app:latest
+    container_name: ksql-app
+    environment:
+      PYTHONPATH: "/app/consumers"
+      BROKER_URL: "kafka0:19092"
+      KSQL_URL: "http://ksql:8088"
+      KAFKA_CONNECT_URL: "http://connect:8083"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+    volumes:
+      - ./:/app
+    networks:
+      - streaming
+    command: python /app/consumers/ksql.py
+    depends_on:
+      - "ksql"
+
+  web-app:
+    image: streaming-app:latest
+    container_name: web-app
+    environment:
+      PYTHONPATH: "/app/consumers"
+      BROKER_URL: "kafka0:19092"
+      KSQL_URL: "http://ksql:8088"
+      KAFKA_CONNECT_URL: "http://connect:8083"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+    ports:
+    - 8888:8888
+    volumes:
+      - ./:/app
+    networks:
+      - streaming
+    depends_on:
+      - "kafka0"
+      - "schema-registry"
 
   producer:
     image: streaming-app:latest
@@ -37,6 +77,9 @@ services:
     networks:
       - streaming
     command: python /app/producers/simulation.py
+    depends_on:
+      - "kafka0"
+      - "schema-registry"
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.2

@@ -63,6 +63,7 @@ services:
     depends_on:
       - "kafka0"
       - "schema-registry"
+    command: python ./consumers/server.py
 
   producer:
     image: streaming-app:latest
@@ -77,6 +78,7 @@ services:
     networks:
       - streaming
     command: python /app/producers/simulation.py
+    restart: always
     depends_on:
       - "kafka0"
       - "schema-registry"

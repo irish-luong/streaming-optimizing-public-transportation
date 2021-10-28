@@ -1,4 +1,5 @@
 """Contains functionality related to Weather"""
+import json
 import logging
 
 
@@ -10,14 +11,18 @@ class Weather:
 
     def __init__(self):
         """Creates the weather model"""
-        self.temperature = 70.0
-        self.status = "sunny"
+        self.temperature = 10.0
+        self.status = "cloudy"
 
     def process_message(self, message):
         """Handles incoming weather data"""
-        logger.info("weather process_message is incomplete - skipping")
-        #
-        #
         # TODO: Process incoming weather messages. Set the temperature and status.
-        #
-        #
+        value = json.loads(message.value())
+
+        logger.info(f"Weather {value}")
+        logger.info("yyyy")
+        self.temperature = value["temperature"]
+        self.status = value["status"]
+
+
+

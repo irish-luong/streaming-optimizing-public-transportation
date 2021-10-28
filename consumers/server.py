@@ -74,7 +74,7 @@ def run_server():
             is_avro=False,
         ),
         KafkaConsumer(
-            "^org.chicago.cta.station.arrivals.",
+            "^org.chicago.cta.station.arrivals.*",
             lines.process_message,
             offset_earliest=True,
         ),
@@ -82,7 +82,6 @@ def run_server():
             "TURNSTILE_SUMMARY",
             lines.process_message,
             offset_earliest=True,
-            is_avro=False,
         ),
     ]
 

@@ -33,7 +33,7 @@ class Station(Producer):
 
         self.station_name = station_name
 
-        topic_name = f"{station_name}"
+        topic_name = f"org.chicago.cta.station.arrivals.{station_name}"
         super(Station, self).__init__(
             topic_name,
             key_schema=Station.key_schema,
@@ -62,7 +62,7 @@ class Station(Producer):
             logger.info(f"None value {train}, {direction}, {prev_station_id}, {prev_direction}")
             return
 
-        logger.info(f"Publish train: {train.train_id} | direction {direction} | line: {self.color.name} "
+        logger.info(f"Publish train: {self.topic_name}: {train.train_id} | direction {direction} | line: {self.color.name} "
                     f"prev_station_id: {prev_station_id} | prev_direction: {prev_direction}")
 
         self.producer.produce(
@@ -109,7 +109,3 @@ class Station(Producer):
         """Prepares the producer for exit by cleaning up the producer"""
         self.turnstile.close()
         super(Station, self).close()
-
-
-if __name__ == '__main__':
-    station = Station(0, "okinawa", "green")

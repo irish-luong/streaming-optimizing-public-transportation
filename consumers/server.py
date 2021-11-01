@@ -63,11 +63,6 @@ def run_server():
     # Build kafka consumers
     consumers = [
         KafkaConsumer(
-            "org.chicago.cta.weather.v1",
-            weather_model.process_message,
-            offset_earliest=True,
-        ),
-        KafkaConsumer(
             "org.chicago.cta.stations.table.v1",
             lines.process_message,
             offset_earliest=True,
@@ -82,7 +77,14 @@ def run_server():
             "TURNSTILE_SUMMARY",
             lines.process_message,
             offset_earliest=True,
+            is_avro=False
         ),
+        KafkaConsumer(
+            "org.chicago.cta.weather.v1",
+            weather_model.process_message,
+            offset_earliest=True,
+            is_avro=True
+        )
     ]
 
     try:

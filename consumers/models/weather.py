@@ -16,11 +16,7 @@ class Weather:
 
     def process_message(self, message):
         """Handles incoming weather data"""
-        # TODO: Process incoming weather messages. Set the temperature and status.
-        value = json.loads(message.value())
-
-        logger.info(f"Weather {value}")
-        logger.info("yyyy")
+        value = message.value()
         self.temperature = value["temperature"]
         self.status = value["status"]
 

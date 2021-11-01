@@ -63,7 +63,7 @@ class Station(Producer):
             return
 
         logger.info(f"Publish train: {self.topic_name}: {train.train_id} | direction {direction} | line: {self.color.name} "
-                    f"prev_station_id: {prev_station_id} | prev_direction: {prev_direction}")
+                    f"prev_station_id: {prev_station_id} | prev_direction: {prev_direction} | station {self.station_id}")
 
         self.producer.produce(
             topic=self.topic_name,

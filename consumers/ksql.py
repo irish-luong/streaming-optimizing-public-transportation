@@ -33,11 +33,11 @@ CREATE TABLE turnstile (
 
 CREATE TABLE turnstile_summary
 WITH (
-    VALUE_FORMAT='AVRO'
+    VALUE_FORMAT='JSON'
 ) AS
 SELECT
     station_id,
-    COUNT(*) as station_count
+    SUM(num_entries) as total
 FROM
     turnstile
 GROUP BY station_id;
@@ -47,9 +47,8 @@ GROUP BY station_id;
 def execute_statement():
     """Executes the KSQL statement against the KSQL API"""
     if topic_check.topic_exists("TURNSTILE_SUMMARY") is True:
+        print("TURNSTILE_SUMMARY exist")
         return
-
-    logging.debug("executing ksql statement...")
 
     resp = requests.post(
         f"{KSQL_URL}/ksql",
@@ -64,10 +63,11 @@ def execute_statement():
         ),
     )
 
-    print(KSQL_STATEMENT)
+
     print(resp.json())
     resp.raise_for_status()
 
 
 if __name__ == "__main__":
+    # print("xxx")
     execute_statement()

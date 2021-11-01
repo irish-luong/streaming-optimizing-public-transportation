@@ -48,7 +48,6 @@ class Turnstile(Producer):
         # of entries that were calculated
         #
         #
-        print(self.value_schema)
 
         value = {
             "num_entries": num_entries,
@@ -56,6 +55,9 @@ class Turnstile(Producer):
             "station_name": self.station.station_name,
             "line": self.station.color.name
         }
+
+        logger.info(f"Publish turnstile: num_entries: {num_entries} | station_id: {self.station.station_id}"
+                    f"station_name: {self.station.station_name} | line: {self.station.color.name}")
 
         try:
             self.producer.produce(

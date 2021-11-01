@@ -1,7 +1,7 @@
 import os
 
 
-GROUP_ID = os.getenv("GROUP_ID", "faust")
+GROUP_ID = os.getenv("GROUP_ID", "faust_1")
 KSQL_URL = os.getenv("KSQL_URL")
 BROKER_URL = os.getenv("BROKER_URL")
 KAFKA_CONNECT_URL = os.getenv("KAFKA_CONNECT_URL")

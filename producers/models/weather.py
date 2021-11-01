@@ -35,7 +35,7 @@ class Weather(Producer):
             "org.chicago.cta.weather.v1",
             key_schema=Weather.key_schema,
             value_schema=Weather.value_schema,
-            num_partitions=3,
+            num_partitions=1,
             num_replicas=1,
         )
 
@@ -66,6 +66,13 @@ class Weather(Producer):
 
     def run(self, month):
         self._set_weather(month)
+
+        data = {
+                        "key": {"timestamp": self.time_millis()},
+                        "value": {"temperature": self.temp, "status": self.status.name}
+        }
+
+        logger.info(f"Publish record {data}")
 
         data = json.dumps({
                 "key_schema": json.dumps(Weather.key_schema),

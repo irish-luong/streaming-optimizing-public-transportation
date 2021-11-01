@@ -48,8 +48,8 @@ class KafkaConsumer:
 
     def on_assign(self, consumer, partitions):
         """Callback for when topic assignment takes place"""
-        logger.info("on_assign is incomplete - skipping")
         for partition in partitions:
+            logger.info(f"Look partition {partition} of topic {self.topic_name_pattern}")
             if self.offset_earliest:
                 partition.offset = 0
             logger.info(f"Worker is assign partition number {partition}")

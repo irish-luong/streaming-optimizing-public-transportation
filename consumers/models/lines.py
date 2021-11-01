@@ -32,6 +32,7 @@ class Lines:
             else:
                 logger.debug("discarding unknown line msg %s", value["line"])
         elif "TURNSTILE_SUMMARY" == message.topic():
+            logger.info("here")
             self.green_line.process_message(message)
             self.red_line.process_message(message)
             self.blue_line.process_message(message)

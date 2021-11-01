@@ -42,6 +42,7 @@ services:
     networks:
       - streaming
     command: python /app/consumers/ksql.py
+#    command: tail -f /dev/null
     depends_on:
       - "ksql"
 

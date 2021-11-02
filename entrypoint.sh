@@ -24,7 +24,7 @@ check_turnstile() {
         sleep $SLEEP_SEC;
         if [ "$i" == "5" ]; then echo "Stop process because turnstile topic is not found" && exit 1; fi;
     else
-        echo "KSQL is ready:";
+        echo "App is ready:";
         cat response.txt;
         echo "Go"
         break;

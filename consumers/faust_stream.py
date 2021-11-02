@@ -40,17 +40,16 @@ topic = app.topic('kafka-connect-stations', value_type=Station)
 # TODO: Define the output Kafka Topic
 out_topic = app.topic(
     "org.chicago.cta.stations.table.v1",
-    value_type=TransformedStation,
     partitions=1
 )
 
 # TODO: Define a Faust Table
-# table = app.Table(
-#    "org.chicago.cta.stations.table.v1",
-#    # default=TODO,
-#    partitions=1,
-#    changelog_topic=out_topic,
-# )
+table = app.Table(
+   "org.chicago.cta.stations.table.v1",
+   default=TransformedStation,
+   partitions=1,
+   changelog_topic=out_topic,
+)
 
 
 @app.agent(topic)
@@ -68,15 +67,12 @@ async def transformed_station(stations):
         else:
             line = ""
 
-        await out_topic.send(
-            value=TransformedStation(
+        table[station.station_id] = TransformedStation(
                 station_id=station.station_id,
                 station_name=station.station_name,
                 order=station.order,
                 line=line
-            )
         )
-
 
 if __name__ == "__main__":
     app.main()

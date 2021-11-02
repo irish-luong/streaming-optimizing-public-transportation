@@ -35,7 +35,8 @@ class KafkaConsumer:
             "group.id": GROUP_ID,
             "max.poll.interval.ms": 60000,
             "bootstrap.servers": BROKER_URL,
-            "enable.auto.offset.store": False
+            "enable.auto.offset.store": False,
+            "auto.offset.reset": "earliest" if offset_earliest else "latest"
         }
 
         if is_avro is True:
@@ -50,9 +51,6 @@ class KafkaConsumer:
         """Callback for when topic assignment takes place"""
         for partition in partitions:
             logger.info(f"Look partition {partition} of topic {self.topic_name_pattern}")
-            if self.offset_earliest:
-                partition.offset = 0
-            logger.info(f"Worker is assign partition number {partition}")
 
         logger.info("partitions assigned for %s", self.topic_name_pattern)
         consumer.assign(partitions)

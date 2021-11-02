@@ -68,11 +68,14 @@ class Weather(Producer):
         self._set_weather(month)
 
         data = {
-                        "key": {"timestamp": self.time_millis()},
-                        "value": {"temperature": self.temp, "status": self.status.name}
+            "key": {"timestamp": self.time_millis()},
+            "value": {
+                "temperature": self.temp,
+                "status": self.status.name
+            }
         }
 
-        logger.info(f"Publish record {data}")
+        logger.info(f"[WEATHER] Publish record {data}")
 
         data = json.dumps({
                 "key_schema": json.dumps(Weather.key_schema),
@@ -93,13 +96,10 @@ class Weather(Producer):
         )
 
         logger.info(resp.json())
-
         resp.raise_for_status()
 
         logger.debug(
-            "sent weather data to kafka, temp: %s, status: %s",
+            "sent WEATHER data to kafka, temp: %s, status: %s",
             self.temp,
             self.status.name,
         )
-
-        # raise Exception("stop")

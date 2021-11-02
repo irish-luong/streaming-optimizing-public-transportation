@@ -37,7 +37,7 @@ WITH (
 ) AS
 SELECT
     station_id,
-    SUM(num_entries) as count
+    count(station_id) as count
 FROM
     turnstile
 GROUP BY station_id;

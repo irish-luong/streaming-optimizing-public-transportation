@@ -42,32 +42,25 @@ class Turnstile(Producer):
     def run(self, timestamp, time_step):
         """Simulates riders entering through the turnstile."""
         num_entries = self.turnstile_hardware.get_entries(timestamp, time_step)
-        #
-        #
-        # TODO: Complete this function by emitting a message to the turnstile topic for the number
-        # of entries that were calculated
-        #
-        #
 
-        value = {
-            "num_entries": num_entries,
-            "station_id": self.station.station_id,
-            "station_name": self.station.station_name,
-            "line": self.station.color.name
-        }
+        for _ in range(num_entries):
+            value = {
+                "station_id": self.station.station_id,
+                "station_name": self.station.station_name,
+                "line": self.station.color.name
+            }
 
-        logger.info(f"Publish turnstile: num_entries: {num_entries} | station_id: {self.station.station_id}"
-                    f"station_name: {self.station.station_name} | line: {self.station.color.name}")
+            logger.info(f"Publish turnstile: num_entries: {num_entries} | station_id: {self.station.station_id}"
+                        f"station_name: {self.station.station_name} | line: {self.station.color.name}")
 
-        try:
-            self.producer.produce(
-                topic="turnstile",
-                key={"timestamp": self.time_millis()},
-                value=value,
-                key_schema=self.key_schema,
-                value_schema=self.value_schema
-            )
-        except:
-            print(self.topic_name)
-            print(value)
-
+            try:
+                self.producer.produce(
+                    topic="turnstile",
+                    key={"timestamp": self.time_millis()},
+                    value=value,
+                    key_schema=self.key_schema,
+                    value_schema=self.value_schema
+                )
+            except:
+                print(self.topic_name)
+                print(value)

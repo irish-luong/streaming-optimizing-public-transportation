@@ -12,7 +12,7 @@ version: '3.7'
 services:
 
   faust-app:
-    image: streaming-app:latest
+    image: iris-luong/streaming-app:latest
     container_name: faust-app
     environment:
       PYTHONPATH: "/app/consumers"
@@ -23,13 +23,13 @@ services:
       - ./:/app
     networks:
       - streaming
-    command: faust -A faust_stream worker -l info
+    command: ./entrypoint.sh faust_app
+    restart: unless-stopped
     depends_on:
-      - "kafka0"
-      - "schema-registry"
+      - "producer"
 
   ksql-app:
-    image: streaming-app:latest
+    image: iris-luong/streaming-app:latest
     container_name: ksql-app
     environment:
       PYTHONPATH: "/app/consumers"
@@ -41,13 +41,13 @@ services:
       - ./:/app
     networks:
       - streaming
-    command: python /app/consumers/ksql.py
-#    command: tail -f /dev/null
+    command: ./entrypoint.sh ksql_app
+    restart: always
     depends_on:
-      - "ksql"
+      - "producer"
 
   web-app:
-    image: streaming-app:latest
+    image: iris-luong/streaming-app:latest
     container_name: web-app
     environment:
       PYTHONPATH: "/app/consumers"
@@ -61,13 +61,13 @@ services:
       - ./:/app
     networks:
       - streaming
+    restart: unless-stopped
     depends_on:
-      - "kafka0"
-      - "schema-registry"
-    command: python ./consumers/server.py
+      - "producer"
+    command: ./entrypoint.sh web_app
 
   producer:
-    image: streaming-app:latest
+    image: iris-luong/streaming-app:latest
     container_name: producer
     environment:
       PYTHONPATH: "/app/producers"
@@ -78,11 +78,10 @@ services:
       - ./:/app
     networks:
       - streaming
-    command: python /app/producers/simulation.py
-    restart: always
+    command: ./entrypoint.sh simulation
+    restart: unless-stopped
     depends_on:
-      - "kafka0"
-      - "schema-registry"
+      - "ksql"
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.2
@@ -167,8 +166,7 @@ services:
     networks:
       - streaming
     depends_on:
-    - "kafka0"
-    - "schema-registry"
+    - "ksql"
 
   ksql:
     image: confluentinc/cp-ksql-server:5.2.2

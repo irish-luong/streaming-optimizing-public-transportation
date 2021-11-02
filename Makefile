@@ -1,6 +1,10 @@
 init:
-    docker build . -t streaming-app
+	docker build . -t iris-luong/streaming-app:latest
 up:
-    docker-compose up -d
+	docker-compose up -d
+
+build:
+	make init
+	make up
 down:
-    docker-compose down --remove-orphans
+	docker-compose down --remove-orphans
